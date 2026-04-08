@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "name": "eventflex-frontend",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_SERVER_URL": "https://eventflex-backend.vercel.app",
+    "VITE_RAZORPAY_KEY": "rzp_test_SYAcYi8w0tPFB9"
+  }
+}

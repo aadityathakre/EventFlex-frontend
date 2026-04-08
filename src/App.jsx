@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./app.css";
+import "./App.css";
 import Home from "./pages/Home.jsx";
 import Register from "./pages/Register.jsx";
 import Login from "./pages/login.jsx";
@@ -48,8 +48,17 @@ import GigFeedbacks from "./pages/gig/GigFeedbacks.jsx";
 import GigMyEvents from "./pages/gig/GigMyEvents.jsx";
 import GigEventDetails from "./pages/gig/GigEventDetails.jsx";
 
-// For separate development, point to server on port 8080
-export const serverURL = `${import.meta.env.VITE_SERVER_URL}:${import.meta.env.VITE_PORT}/api/v1`;
+// Smart server URL that works for both local and production
+const getServerURL = () => {
+  // Check if we're in production (Vercel)
+  if (window.location.hostname === 'eventflex.vercel.app') {
+    return 'https://eventflex-backend.vercel.app/api/v1';
+  }
+  // Local development
+  return `${import.meta.env.VITE_SERVER_URL || 'http://localhost:8080'}/api/v1`;
+};
+
+export const serverURL = getServerURL();
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
