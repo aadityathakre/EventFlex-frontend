@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FaTimes } from "react-icons/fa";
 import { redirect, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { serverURL } from "../App.jsx";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import {auth} from "../../firebase.js"
+import GoogleAuthButton from "../components/GoogleAuthButton.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 
 function Login() {
@@ -37,38 +35,29 @@ function Login() {
   }, []);
 
 
-  const handleGoogleAuth = async (e) => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const data = await signInWithPopup(auth, provider);
-      
-      const result = await axios.post(
-        `${serverURL}/auth/users/google-auth`,
-        { email: data.user.email },
-        { withCredentials: true }
-      );
+  const handleGoogleSuccess = (data) => {
+    const { user, accessToken, refreshToken } = data;
+    
+    // Update auth context
+    login(user, accessToken, refreshToken);
+    
+    setEmail("");
+    setPassword("");
 
-      const { user, accessToken, refreshToken } = result.data.data;
-      
-      // Update auth context
-      login(user, accessToken, refreshToken);
-      
-      setEmail("");
-      setPassword("");
+    // Redirect based on user role
+    const roleRoutes = {
+      host: "/host/dashboard",
+      organizer: "/organizer/dashboard",
+      gig: "/gig/dashboard",
+    };
 
-      // Redirect based on user role
-      const roleRoutes = {
-        host: "/host/dashboard",
-        organizer: "/organizer/dashboard",
-        gig: "/gig/dashboard",
-      };
+    const redirectTo = roleRoutes[user.role] || "/";
+    navigate(redirectTo);
+  };
 
-      const redirectTo = roleRoutes[user.role] || "/";
-      navigate(redirectTo);
-    } catch (error) {
-      console.log("Google Auth error:", error.message);
-      setErr(error.response?.data?.message || "Google authentication failed");
-    }
+  const handleGoogleError = (errorMessage) => {
+    console.log("Google Auth error:", errorMessage);
+    setErr(errorMessage);
   };
 
   // Test function to check if backend can set cookies
@@ -138,13 +127,12 @@ function Login() {
         </p>
 
         {/* Google OAuth */}
-        <button
-          type="button"
-          className="w-full flex cursor-pointer items-center justify-center gap-3 border-2 border-purple-200 rounded-lg shadow-md py-2 px-4 bg-white hover:bg-purple-50 hover:border-purple-300 transition-all duration-300 mb-6" onClick={handleGoogleAuth}
-        >
-          <FcGoogle className="text-2xl" />
-          <span className="text-gray-700 font-medium">Login with Google</span>
-        </button>
+        <div className="mb-6">
+          <GoogleAuthButton 
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </div>
 
         {/* Divider */}
         <div className="flex items-center mb-6">
